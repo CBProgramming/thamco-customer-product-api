@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerProductService", "CustomerProductService\CustomerProductService.csproj", "{80DA7AD8-0002-429E-BA48-2BCF9D8AD356}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomerProductService", "CustomerProductService\CustomerProductService.csproj", "{80DA7AD8-0002-429E-BA48-2BCF9D8AD356}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductRepository", "ProductRepository\ProductRepository.csproj", "{DE52EBB7-34ED-448D-98F9-45291443D5BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductRepository", "ProductRepository\ProductRepository.csproj", "{DE52EBB7-34ED-448D-98F9-45291443D5BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductData", "ProductData\ProductData.csproj", "{42DF2850-6C52-4A07-8FF0-3B8644278958}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DE52EBB7-34ED-448D-98F9-45291443D5BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE52EBB7-34ED-448D-98F9-45291443D5BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE52EBB7-34ED-448D-98F9-45291443D5BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42DF2850-6C52-4A07-8FF0-3B8644278958}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42DF2850-6C52-4A07-8FF0-3B8644278958}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42DF2850-6C52-4A07-8FF0-3B8644278958}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42DF2850-6C52-4A07-8FF0-3B8644278958}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
