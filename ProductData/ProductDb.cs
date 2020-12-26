@@ -9,6 +9,10 @@ namespace ProductData
     {
         public DbSet<Product> Products { get; set; }
 
+        public DbSet<Brand> Brands { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
+
         public ProductDb(DbContextOptions<ProductDb> options) : base(options)
         {
         }
@@ -22,6 +26,19 @@ namespace ProductData
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.HasDefaultSchema("products");
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.ProductId)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<Brand>()
+                .Property(b => b.BrandId)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<Category>()
+                .Property(c => c.CategoryId)
+                .ValueGeneratedNever();
         }
     }
 }

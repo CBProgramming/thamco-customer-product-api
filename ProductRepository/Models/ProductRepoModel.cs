@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace ProductData
+namespace ProductRepository.Data
 {
-    public class Product
+    public class ProductRepoModel
     {
         public int ProductId { get; set; }
 
@@ -14,7 +16,11 @@ namespace ProductData
 
         public int BrandId { get; set; }
 
+        public string Brand { get; set; }
+
         public int CategoryId { get; set; }
+
+        public string Category { get; set; }
 
         public double Price { get; set; }
     }
