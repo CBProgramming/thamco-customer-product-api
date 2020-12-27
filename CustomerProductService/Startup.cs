@@ -24,17 +24,22 @@ using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using IdentityModel.Client;
+using ProductRepository;
+using ProductOrderFacade;
 
 namespace CustomerProductService
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public IConfiguration Configuration { get; }
+
+        private Microsoft.AspNetCore.Hosting.IHostingEnvironment Env { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -63,6 +68,18 @@ namespace CustomerProductService
                 var cs = Configuration.GetConnectionString("ProductConnection");
                 options.UseSqlServer(cs);
             });
+
+            services.AddScoped<IProductRepository, ProductRepository.ProductRepository>();
+
+            if (Env.IsDevelopment())
+            {
+                services.AddScoped<IProductOrderFacade, ProductOrderFacade.ProductOrderFacade>();
+            }
+            else
+            {
+                services.AddScoped<IProductOrderFacade, ProductOrderFacade.ProductOrderFacade>();
+            }
+
             services.AddHttpClient("CustomerOrderingAPI", client =>
             {
                 client.BaseAddress = new Uri(Configuration.GetSection("CustomerOrderingUrl").Value);
@@ -85,6 +102,8 @@ namespace CustomerProductService
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

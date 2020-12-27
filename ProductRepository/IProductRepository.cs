@@ -9,15 +9,15 @@ namespace ProductRepository
 {
     public interface IProductRepository
     {
-        public Task<bool> EditProduct(ProductRepoModel product);
+        public Task<bool> UpdateProducts(IList<ProductRepoModel> products);
 
-        public Task<bool> NewProduct(ProductRepoModel product);
+        public Task<bool> UpdateBrands(IList<ProductRepoModel> products);
 
-        public Task<bool> ProductExists(int id);
+        public Task<bool> UpdateCategories(IList<ProductRepoModel> products);
 
         public Task<ProductRepoModel> GetProduct(int productId);
 
-        public Task<IList<ProductRepoModel>> GetProducts(int? productId, int? brandId, int? categoryId, string? brand, 
+        public Task<IList<ProductRepoModel>> GetProducts(int? brandId, int? categoryId, string? brand, 
             string? category, string? searchString, double? minPrice, double? maxPrice);
 
         public Task<ProductInfoRepoModel> GetProductInfo();

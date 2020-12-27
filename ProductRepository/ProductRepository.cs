@@ -21,127 +21,124 @@ namespace ProductRepository
             _mapper = mapper;
         }
 
-        public async Task<bool> ProductExists(int id)
+        public async Task<bool> UpdateProducts(IList<ProductRepoModel> products)
         {
-            return _context.Products.Any(p => p.ProductId == id);
-        }
-
-        public async Task<bool> NewProduct(ProductRepoModel productModel)
-        {
-            if (productModel != null)
+            try
             {
-                try
+                foreach (ProductRepoModel productModel in products)
                 {
-                    if (await UpdateCategories(productModel.CategoryId, productModel.Category)
-                        && await UpdateBrands(productModel.BrandId, productModel.Brand))
+                    var product = _context.Products.FirstOrDefault(p => p.ProductId == productModel.ProductId);
+                    if (product == null)
                     {
-                        var product = _mapper.Map<Product>(productModel);
+                        product = _mapper.Map<Product>(productModel);
                         _context.Add(product);
-                        await _context.SaveChangesAsync();
-                        return true;
+                    }
+                    else
+                    {
+                        product.Name = productModel.Name;
+                        product.Description = productModel.Description;
+                        product.Price = productModel.Price;
+                        product.Quantity += productModel.Quantity;
+                        product.BrandId = productModel.BrandId;
+                        product.CategoryId = productModel.CategoryId;
                     }
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-
-                }
             }
-            return false;
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<bool> EditProduct(ProductRepoModel productModel)
+        public async Task<bool> UpdateBrands(IList<ProductRepoModel> products)
         {
-            if (productModel != null)
+            try
             {
-                var product = _context.Products.FirstOrDefault(p => p.ProductId == productModel.ProductId);
-                if (product != null)
+                foreach (ProductRepoModel productModel in products)
                 {
-                    try
+                    var dbBrand = _context.Brands.SingleOrDefault(b => b.BrandId == productModel.BrandId);
+                    if (dbBrand == null)
                     {
-                        if (await UpdateCategories(productModel.CategoryId, productModel.Category)
-                        && await UpdateBrands(productModel.BrandId, productModel.Brand))
+                        _context.Add(new Brand
                         {
-                            product.Name = productModel.Name;
-                            product.Description = productModel.Description;
-                            product.Price = productModel.Price;
-                            product.Quantity += productModel.Quantity;
-                            product.BrandId = productModel.BrandId;
-                            product.CategoryId = productModel.CategoryId;
-                            await _context.SaveChangesAsync();
-                            return true;
-                        }
+                            BrandId = productModel.BrandId,
+                            BrandName = productModel.Brand
+                        });
                     }
-                    catch (DbUpdateConcurrencyException)
+                    else if (!string.IsNullOrEmpty(productModel.Brand) && dbBrand.BrandName != productModel.Brand)
                     {
+                        dbBrand.BrandName = productModel.Brand;
                     }
                 }
             }
-            return false;
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        private async Task<bool> UpdateBrands(int brandId, string brand)
+        public async Task<bool> UpdateCategories(IList<ProductRepoModel> products)
         {
             try
             {
-                var dbBrand = _context.Brands.SingleOrDefault(b => b.BrandId == brandId);
-                if (dbBrand == null)
+                foreach (ProductRepoModel productModel in products)
                 {
-                    _context.Add(new Brand
+                    var dbCategory = _context.Categories.SingleOrDefault(b => b.CategoryId == productModel.CategoryId);
+                    if (dbCategory == null)
                     {
-                        BrandId = brandId,
-                        BrandName = brand
-                    });
+                        _context.Add(new Category
+                        {
+                            CategoryId = productModel.CategoryId,
+                            CategoryName = productModel.Category
+                        });
+                    }
+                    else if (!string.IsNullOrEmpty(productModel.Category) && dbCategory.CategoryName != productModel.Category)
+                    {
+                        dbCategory.CategoryName = productModel.Category;
+                    }
                 }
-                else if (dbBrand.BrandName == brand)
-                {
-                    return true;
-                }
-                else
-                {
-                    dbBrand.BrandName = brand;
-                }
-                await _context.SaveChangesAsync();
-                return true;
             }
             catch (DbUpdateConcurrencyException)
             {
+                return false;
             }
-            return false;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        private async Task<bool> UpdateCategories(int categoryId, string category)
+        public async Task<ProductRepoModel> GetProduct(int productId)
         {
-            try
-            {
-                var dbCategory = _context.Categories.SingleOrDefault(b => b.CategoryId == categoryId);
-                if (dbCategory == null)
-                {
-                    _context.Add(new Category
-                    {
-                        CategoryId = categoryId,
-                        CategoryName = category
-                    });
-                }
-                else if (dbCategory.CategoryName == category)
-                {
-                    return true;
-                }
-                else
-                {
-                    dbCategory.CategoryName = category;
-                }
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-            }
-            return false;
+            IQueryable<Product> product = _context.Products
+                .Where(p => p.ProductId == productId);
+            var result = JoinBrandsAndCategories(product).FirstOrDefault();
+            return result;
         }
 
-        public Task<ProductRepoModel> GetProduct(int productId)
+        private IQueryable<ProductRepoModel> JoinBrandsAndCategories(IQueryable<Product> query)
         {
-            throw new NotImplementedException();
+            return query.Join(_context.Brands,
+                p => p.BrandId,
+                b => b.BrandId,
+                (midProduct, brand) => new { midProduct, brand })
+                .Join(_context.Categories,
+                p => p.midProduct.CategoryId,
+                c => c.CategoryId,
+                (product, category) => new ProductRepoModel
+                {
+                    ProductId = product.midProduct.ProductId,
+                    Name = product.midProduct.Name,
+                    Description = product.midProduct.Description,
+                    Quantity = product.midProduct.Quantity,
+                    BrandId = product.midProduct.BrandId,
+                    Brand = product.brand.BrandName,
+                    CategoryId = product.midProduct.CategoryId,
+                    Category = category.CategoryName,
+                    Price = product.midProduct.Price
+                });
         }
 
         public async Task<ProductInfoRepoModel> GetProductInfo()
@@ -163,14 +160,10 @@ namespace ProductRepository
             return _context.Categories.Select(b => b.CategoryName).ToList();
         }
 
-        public async Task<IList<ProductRepoModel>> GetProducts(int? productId, int? brandId, int? categoryId, string? brand, 
+        public async Task<IList<ProductRepoModel>> GetProducts(int? brandId, int? categoryId, string? brand, 
             string? category, string? searchString, double? minPrice, double? maxPrice)
         {
             IQueryable<Product> products = _context.Products;
-            if (productId != null && productId > 0)
-            {
-                products = products.Where(p => p.ProductId == productId);
-            }
             if (brandId != null && brandId > 0)
             {
                 products = products.Where(p => p.BrandId == brandId);
@@ -201,7 +194,8 @@ namespace ProductRepository
                 products = products.Where(p => p.CategoryId == _context.Categories
                 .FirstOrDefault(c => c.CategoryName == category).CategoryId);
             }
-            return _mapper.Map<List<ProductRepoModel>>((from product in products select product).ToList());
+            var result = JoinBrandsAndCategories(products).ToList();
+            return result;
         }
     }
 }

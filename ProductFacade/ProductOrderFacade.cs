@@ -30,7 +30,8 @@ namespace ProductOrderFacade
             if (httpClient != null)
             {
                 string uri = _config.GetSection("CustomerOrderingUri").Value;
-                if ((await httpClient.PostAsJsonAsync<IList<ProductUpdateDto>>(uri, products)).IsSuccessStatusCode)
+                var result = await httpClient.PostAsJsonAsync<IList<ProductUpdateDto>>(uri, products);
+                if (result.IsSuccessStatusCode)
                 {
                     return true;
                 }
@@ -58,7 +59,7 @@ namespace ProductOrderFacade
                 Address = disco.TokenEndpoint,
                 ClientId = clientId,
                 ClientSecret = clientSecret,
-                Scope = "order_api"
+                Scope = "customer_ordering_api"
             });
             client.SetBearerToken(tokenResponse.AccessToken);
             return client;
