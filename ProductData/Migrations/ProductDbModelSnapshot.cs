@@ -116,6 +116,26 @@ namespace ProductData.Migrations
                             Name = "Product 2",
                             Price = 2.9900000000000002,
                             Quantity = 20
+                        },
+                        new
+                        {
+                            ProductId = 3,
+                            BrandId = 1,
+                            CategoryId = 2,
+                            Description = "Desc 3",
+                            Name = "Product 3",
+                            Price = 3.9900000000000002,
+                            Quantity = 30
+                        },
+                        new
+                        {
+                            ProductId = 4,
+                            BrandId = 2,
+                            CategoryId = 1,
+                            Description = "Desc 4",
+                            Name = "Product 4",
+                            Price = 4.9900000000000002,
+                            Quantity = 40
                         });
                 });
 #pragma warning restore 612, 618

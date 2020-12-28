@@ -15,7 +15,6 @@ using ProductRepository.Data;
 namespace CustomerProductService.Controllers
 {
     [ApiController]
-    [Authorize]
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
@@ -34,6 +33,7 @@ namespace CustomerProductService.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "CustomerOnly")]
         public async Task<IActionResult> Get(int? productId, int? brandId, int? categoryId, string? brand, 
             string? category, string? searchString, double? minPrice, double? maxPrice)
         {
@@ -61,6 +61,7 @@ namespace CustomerProductService.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "StaffProductAPIOnly")]
         public async Task<IActionResult> Create(IList<ProductDto> products)
         {
             if (products == null || products.Count < 1)

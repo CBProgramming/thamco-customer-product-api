@@ -9,8 +9,8 @@ using ProductData;
 namespace ProductData.Migrations
 {
     [DbContext(typeof(ProductDb))]
-    [Migration("20201227115016_seedDataAdded")]
-    partial class seedDataAdded
+    [Migration("20201227151001_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -118,6 +118,26 @@ namespace ProductData.Migrations
                             Name = "Product 2",
                             Price = 2.9900000000000002,
                             Quantity = 20
+                        },
+                        new
+                        {
+                            ProductId = 3,
+                            BrandId = 1,
+                            CategoryId = 2,
+                            Description = "Desc 3",
+                            Name = "Product 3",
+                            Price = 3.9900000000000002,
+                            Quantity = 30
+                        },
+                        new
+                        {
+                            ProductId = 4,
+                            BrandId = 2,
+                            CategoryId = 1,
+                            Description = "Desc 4",
+                            Name = "Product 4",
+                            Price = 4.9900000000000002,
+                            Quantity = 40
                         });
                 });
 #pragma warning restore 612, 618

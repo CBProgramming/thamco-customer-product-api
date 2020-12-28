@@ -50,6 +50,11 @@ namespace CustomerProductService
                 {
                     options.Authority = Configuration.GetValue<string>("StaffAuthServerUrl");
                     options.Audience = "customer_product_api";
+                })
+                .AddJwtBearer("CustomerAuth", options =>
+                {
+                    options.Authority = Configuration.GetValue<string>("CustomerAuthServerUrl");
+                    options.Audience = "customer_product_api";
                 });
 
             services.AddAuthorization(OptionsBuilderConfigurationExtensions =>
@@ -58,6 +63,14 @@ namespace CustomerProductService
                 .RequireAuthenticatedUser()
                 .AddAuthenticationSchemes("ProductAuth")
                 .Build();
+                OptionsBuilderConfigurationExtensions.AddPolicy("CustomerOnly", new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes("CustomerAuth")
+                    .Build());
+                OptionsBuilderConfigurationExtensions.AddPolicy("StaffProductAPIOnly", new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes("ProductAuth")
+                    .Build());
             });
 
 
