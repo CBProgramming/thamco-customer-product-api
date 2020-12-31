@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Authorization;
 using IdentityModel.Client;
 using ProductRepository;
 using ProductOrderFacade;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CustomerProductService
 {
@@ -45,7 +46,13 @@ namespace CustomerProductService
         public void ConfigureServices(IServiceCollection services)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer()
                 .AddJwtBearer("ProductAuth", options =>
                 {
                     options.Authority = Configuration.GetValue<string>("StaffAuthServerUrl");
