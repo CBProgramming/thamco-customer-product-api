@@ -27,6 +27,7 @@ using IdentityModel.Client;
 using ProductRepository;
 using ProductOrderFacade;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using HttpManager;
 
 namespace CustomerProductService
 {
@@ -90,6 +91,8 @@ namespace CustomerProductService
             });
 
             services.AddScoped<IProductRepository, ProductRepository.ProductRepository>();
+            services.AddScoped<IHttpHandler, HttpHandler>();
+            services.AddScoped<IAccessTokenGetter, AccessTokenGetter>();
 
             if (Env.IsDevelopment())
             {

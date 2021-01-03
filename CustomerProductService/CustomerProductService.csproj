@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HttpManager\HttpManager.csproj" />
     <ProjectReference Include="..\ProductData\ProductData.csproj" />
     <ProjectReference Include="..\ProductFacade\ProductOrderFacade.csproj" />
     <ProjectReference Include="..\ProductRepository\ProductRepository.csproj" />

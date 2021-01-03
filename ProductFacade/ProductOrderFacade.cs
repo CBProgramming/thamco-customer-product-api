@@ -1,4 +1,5 @@
-﻿using IdentityModel.Client;
+﻿using HttpManager;
+using IdentityModel.Client;
 using Microsoft.Extensions.Configuration;
 using ProductOrderFacade.Models;
 using System;
@@ -11,13 +12,13 @@ namespace ProductOrderFacade
 {
     public class ProductOrderFacade : IProductOrderFacade
     {
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _config;
+        private readonly IHttpHandler _handler;
 
-        public ProductOrderFacade(IHttpClientFactory httpClientFactory, IConfiguration config)
+        public ProductOrderFacade(IConfiguration config, IHttpHandler handler)
         {
-            _httpClientFactory = httpClientFactory;
             _config = config;
+            _handler = handler;
         }
 
         public async Task<bool> UpdateProducts(IList<ProductUpdateDto> products)
@@ -26,7 +27,7 @@ namespace ProductOrderFacade
             {
                 return false;
             }
-            HttpClient httpClient = await GetClientWithAccessToken();
+            HttpClient httpClient = await _handler.GetClient("CustomerOrderingUrl", "CustomerOrderingAPI", "CustomerOrderingScope");
             if (httpClient != null)
             {
                 string uri = _config.GetSection("CustomerOrderingUri").Value;
@@ -37,32 +38,6 @@ namespace ProductOrderFacade
                 }
             }
             return false;
-        }
-
-        private async Task<HttpClient> GetClientWithAccessToken()
-        {
-            string orderUrl = _config.GetSection("CustomerOrderingUrl").Value;
-            string authServerUrl = _config.GetSection("CustomerAuthServerUrl").Value;
-            string clientSecret = _config.GetSection("ClientSecret").Value;
-            string clientId = _config.GetSection("ClientId").Value;
-            if (string.IsNullOrEmpty(authServerUrl)
-                || string.IsNullOrEmpty(clientSecret)
-                || string.IsNullOrEmpty(clientId)
-                || string.IsNullOrEmpty(orderUrl))
-            {
-                return null;
-            }
-            var client = _httpClientFactory.CreateClient("CustomerOrderingAPI");
-            var disco = await client.GetDiscoveryDocumentAsync(authServerUrl);
-            var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                Scope = "customer_ordering_api"
-            });
-            client.SetBearerToken(tokenResponse.AccessToken);
-            return client;
         }
     }
 }
