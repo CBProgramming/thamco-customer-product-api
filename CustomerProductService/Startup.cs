@@ -92,7 +92,7 @@ namespace CustomerProductService
 
             services.AddScoped<IProductRepository, ProductRepository.ProductRepository>();
             services.AddScoped<IHttpHandler, HttpHandler>();
-            services.AddScoped<IAccessTokenGetter, AccessTokenGetter>();
+            services.AddScoped<IUnmockablesWrapper, UnmockablesWrapper>();
 
             if (Env.IsDevelopment())
             {

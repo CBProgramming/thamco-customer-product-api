@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductData", "ProductData\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProductOrderFacade", "ProductFacade\ProductOrderFacade.csproj", "{B763F880-81FA-45DF-A704-1D2A08E4FA23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpManager", "HttpManager\HttpManager.csproj", "{BF656A35-D357-4EBA-9B54-BB7CEC7AB89F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpManager", "HttpManager\HttpManager.csproj", "{BF656A35-D357-4EBA-9B54-BB7CEC7AB89F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductUnitTests", "ProductUnitTests\ProductUnitTests.csproj", "{64E874EB-5F3D-4FF6-81CE-6D4FAFDDDDF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{BF656A35-D357-4EBA-9B54-BB7CEC7AB89F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF656A35-D357-4EBA-9B54-BB7CEC7AB89F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF656A35-D357-4EBA-9B54-BB7CEC7AB89F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64E874EB-5F3D-4FF6-81CE-6D4FAFDDDDF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64E874EB-5F3D-4FF6-81CE-6D4FAFDDDDF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64E874EB-5F3D-4FF6-81CE-6D4FAFDDDDF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64E874EB-5F3D-4FF6-81CE-6D4FAFDDDDF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CustomerProductService.Data;
+using CustomerProductService.Models;
 using ProductData;
 using ProductOrderFacade.Models;
 using ProductRepository.Data;
@@ -23,6 +24,8 @@ namespace CustomerProductService
             CreateMap<ProductRepoModel, Product>();
             CreateMap<ProductInfoDto, ProductInfoRepoModel>();
             CreateMap<ProductInfoRepoModel, ProductInfoDto>();
+            CreateMap<BrandDto, BrandModel>();
+            CreateMap<BrandModel, BrandDto>();
         }
     }
 }
