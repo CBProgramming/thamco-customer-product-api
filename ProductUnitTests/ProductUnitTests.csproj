@@ -15,7 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CustomerProductService\CustomerProductService.csproj" />
     <ProjectReference Include="..\HttpManager\HttpManager.csproj" />
+    <ProjectReference Include="..\ProductFacade\ProductOrderFacade.csproj" />
+    <ProjectReference Include="..\ProductRepository\ProductRepository.csproj" />
   </ItemGroup>
 
 </Project>

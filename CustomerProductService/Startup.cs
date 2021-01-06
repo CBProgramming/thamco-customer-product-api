@@ -94,6 +94,14 @@ namespace CustomerProductService
             services.AddScoped<IHttpHandler, HttpHandler>();
             services.AddScoped<IUnmockablesWrapper, UnmockablesWrapper>();
 
+            services.AddSingleton(new ClientCredentialsTokenRequest
+            {
+                Address = "",
+                ClientId = Configuration.GetValue<string>("ClientId"),
+                ClientSecret = Configuration.GetValue<string>("ClientSecret"),
+                Scope = ""
+            });
+
             if (Env.IsDevelopment())
             {
                 services.AddScoped<IProductOrderFacade, ProductOrderFacade.ProductOrderFacade>();

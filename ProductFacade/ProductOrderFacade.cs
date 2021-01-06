@@ -12,32 +12,48 @@ namespace ProductOrderFacade
 {
     public class ProductOrderFacade : IProductOrderFacade
     {
-        private readonly IConfiguration _config;
         private readonly IHttpHandler _handler;
+        private string customerAuthUrl;
+        private string orderingApi;
+        private string orderingScope;
+        private string orderingUri;
 
         public ProductOrderFacade(IConfiguration config, IHttpHandler handler)
         {
-            _config = config;
             _handler = handler;
+            if (config != null)
+            {
+                customerAuthUrl = config.GetSection("CustomerAuthServerUrlKey").Value;
+                orderingApi = config.GetSection("CustomerOrderingAPIKey").Value;
+                orderingScope = config.GetSection("CustomerOrderingScopeKey").Value;
+                orderingUri = config.GetSection("CustomerOrderingUri").Value;
+            }
         }
 
         public async Task<bool> UpdateProducts(IList<ProductUpdateDto> products)
         {
-            if (products == null || products.Count == 0)
+            if (products == null || products.Count == 0 || !ValidConfigStrings())
             {
                 return false;
             }
-            HttpClient httpClient = await _handler.GetClient("CustomerOrderingUrl", "CustomerOrderingAPI", "CustomerOrderingScope");
+            HttpClient httpClient = await _handler.GetClient(customerAuthUrl, orderingApi, orderingScope);
             if (httpClient != null)
             {
-                string uri = _config.GetSection("CustomerOrderingUri").Value;
-                var result = await httpClient.PostAsJsonAsync<IList<ProductUpdateDto>>(uri, products);
+                var result = await httpClient.PostAsJsonAsync<IList<ProductUpdateDto>>(orderingUri, products);
                 if (result.IsSuccessStatusCode)
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        private bool ValidConfigStrings()
+        {
+            return !string.IsNullOrEmpty(customerAuthUrl)
+                    && !string.IsNullOrEmpty(orderingApi)
+                    && !string.IsNullOrEmpty(orderingScope)
+                    && !string.IsNullOrEmpty(orderingUri);
         }
     }
 }
