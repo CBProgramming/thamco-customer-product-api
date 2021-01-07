@@ -7,13 +7,17 @@ namespace ProductData
 {
     public class ProductDb : DbContext
     {
-        public DbSet<Product> Products { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
 
-        public DbSet<Brand> Brands { get; set; }
+        public virtual DbSet<Brand> Brands { get; set; }
 
-        public DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
 
         public ProductDb(DbContextOptions<ProductDb> options) : base(options)
+        {
+        }
+
+        public ProductDb()
         {
         }
 

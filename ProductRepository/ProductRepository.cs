@@ -23,24 +23,31 @@ namespace ProductRepository
 
         public async Task<bool> UpdateProducts(IList<ProductRepoModel> products)
         {
+            if (products == null || products.Count == 0)
+            {
+                return false;
+            }
             try
             {
                 foreach (ProductRepoModel productModel in products)
                 {
-                    var product = _context.Products.FirstOrDefault(p => p.ProductId == productModel.ProductId);
-                    if (product == null)
+                    if(productModel != null)
                     {
-                        product = _mapper.Map<Product>(productModel);
-                        _context.Add(product);
-                    }
-                    else
-                    {
-                        product.Name = productModel.Name;
-                        product.Description = productModel.Description;
-                        product.Price = productModel.Price;
-                        product.Quantity += productModel.Quantity;
-                        product.BrandId = productModel.BrandId;
-                        product.CategoryId = productModel.CategoryId;
+                        var product = _context.Products.FirstOrDefault(p => p.ProductId == productModel.ProductId);
+                        if (product == null)
+                        {
+                            product = _mapper.Map<Product>(productModel);
+                            _context.Add(product);
+                        }
+                        else
+                        {
+                            product.Name = productModel.Name;
+                            product.Description = productModel.Description;
+                            product.Price = productModel.Price;
+                            product.Quantity += productModel.Quantity;
+                            product.BrandId = productModel.BrandId;
+                            product.CategoryId = productModel.CategoryId;
+                        }
                     }
                 }
             }
@@ -54,22 +61,29 @@ namespace ProductRepository
 
         public async Task<bool> UpdateBrands(IList<ProductRepoModel> products)
         {
+            if (products == null || products.Count == 0)
+            {
+                return false;
+            }
             try
             {
                 foreach (ProductRepoModel productModel in products)
                 {
-                    var dbBrand = _context.Brands.SingleOrDefault(b => b.BrandId == productModel.BrandId);
-                    if (dbBrand == null)
+                    if (productModel != null)
                     {
-                        _context.Add(new Brand
+                        var dbBrand = _context.Brands.SingleOrDefault(b => b.BrandId == productModel.BrandId);
+                        if (dbBrand == null)
                         {
-                            BrandId = productModel.BrandId,
-                            BrandName = productModel.Brand
-                        });
-                    }
-                    else if (!string.IsNullOrEmpty(productModel.Brand) && dbBrand.BrandName != productModel.Brand)
-                    {
-                        dbBrand.BrandName = productModel.Brand;
+                            _context.Add(new Brand
+                            {
+                                BrandId = productModel.BrandId,
+                                BrandName = productModel.Brand
+                            });
+                        }
+                        else if (!string.IsNullOrEmpty(productModel.Brand) && dbBrand.BrandName != productModel.Brand)
+                        {
+                            dbBrand.BrandName = productModel.Brand;
+                        }
                     }
                 }
             }
@@ -83,22 +97,29 @@ namespace ProductRepository
 
         public async Task<bool> UpdateCategories(IList<ProductRepoModel> products)
         {
+            if (products == null || products.Count == 0)
+            {
+                return false;
+            }
             try
             {
                 foreach (ProductRepoModel productModel in products)
                 {
-                    var dbCategory = _context.Categories.SingleOrDefault(b => b.CategoryId == productModel.CategoryId);
-                    if (dbCategory == null)
+                    if (productModel != null)
                     {
-                        _context.Add(new Category
+                        var dbCategory = _context.Categories.SingleOrDefault(b => b.CategoryId == productModel.CategoryId);
+                        if (dbCategory == null)
                         {
-                            CategoryId = productModel.CategoryId,
-                            CategoryName = productModel.Category
-                        });
-                    }
-                    else if (!string.IsNullOrEmpty(productModel.Category) && dbCategory.CategoryName != productModel.Category)
-                    {
-                        dbCategory.CategoryName = productModel.Category;
+                            _context.Add(new Category
+                            {
+                                CategoryId = productModel.CategoryId,
+                                CategoryName = productModel.Category
+                            });
+                        }
+                        else if (!string.IsNullOrEmpty(productModel.Category) && dbCategory.CategoryName != productModel.Category)
+                        {
+                            dbCategory.CategoryName = productModel.Category;
+                        }
                     }
                 }
             }
