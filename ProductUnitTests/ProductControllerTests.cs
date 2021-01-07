@@ -22,7 +22,7 @@ namespace ProductUnitTests
 {
     public class ProductControllerTests
     {
-        private IList<ProductDto> products;
+        private List<ProductDto> products;
         private IList<ProductRepoModel> repoProducts;
         private ProductDto product1, product2, product3, product4;
         private ProductRepoModel productRepoModel, productRepoModel1, 
@@ -334,6 +334,27 @@ namespace ProductUnitTests
             }
             Assert.Equal(fakeRepo.Brands, info.Brands);
             Assert.Equal(fakeRepo.Categories, info.Categories);
+        }
+
+        [Fact]
+        public async Task GetProducts_WithFakes_AllNull_RepoFails_ReturnsEmptyList()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.RepoSucceeds = false;
+
+            //Act
+            var result = controller.Get(productId: null, brandId: null, categoryId: null, brand: null,
+                category: null, searchString: null, minPrice: null, maxPrice: null);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as OkObjectResult;
+            Assert.NotNull(obj);
+            var info = obj.Value as ProductInfoDto;
+            Assert.NotNull(info);
+            Assert.True(info.Brands.Count == 0);
+            Assert.True(info.Categories.Count == 0);
         }
 
         [Fact]
@@ -943,6 +964,23 @@ namespace ProductUnitTests
             Assert.Equal(productRepoModel.CategoryId, product.CategoryId);
             Assert.Equal(productRepoModel.Category, product.Category);
             Assert.Equal(productRepoModel.Price, product.Price);
+        }
+
+        [Fact]
+        public async Task GetProducts_WithFakes_ValidProductIdThatExists_OtherOptionalParametersNull_RepoFails_ReturnsNotFound()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.RepoSucceeds = false;
+
+            //Act
+            var result = controller.Get(productId: 1, brandId: null, categoryId: null, brand: null,
+                category: null, searchString: null, minPrice: null, maxPrice: null);
+
+            //Assert 
+            Assert.NotNull(result);
+            var notFound = await result as NotFoundResult;
+            Assert.NotNull(notFound);
         }
 
         [Fact]
@@ -2488,6 +2526,26 @@ namespace ProductUnitTests
         }
 
         [Fact]
+        public async Task GetProducts_WithFakes_NullProductId_ValidBrandId_RepoFails_ReturnsEmptyList()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.RepoSucceeds = false;
+
+            //Act
+            var result = controller.Get(productId: null, brandId: 1, categoryId: null, brand: null,
+                category: null, searchString: null, minPrice: null, maxPrice: null);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as OkObjectResult;
+            Assert.NotNull(obj);
+            var products = obj.Value as List<ProductDto>;
+            Assert.NotNull(products);
+            Assert.True(products.Count == 0);
+        }
+
+        [Fact]
         public async Task GetProducts_WithFakes_NullProductId_InvalidBrandId_ReturnsNoProducts()
         {
             //Arrange
@@ -3333,11 +3391,169 @@ namespace ProductUnitTests
             mockOrderFacade.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductUpdateDto>>()), Times.Never);
         }
 
+        [Fact]
+        public async Task CreateProducts_WithFakes_ValidProducts_ShouldOk()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.Brands = new List<string>();
+            fakeRepo.Categories = new List<string>();
+            fakeRepo.RepoProducts = new List<ProductRepoModel>();
 
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as OkResult;
+            Assert.NotNull(obj);
+            Assert.Equal(products.Count, fakeRepo.RepoProducts.Count);
+            for (int i = 0; i < fakeRepo.RepoProducts.Count; i++)
+            {
+                Assert.Equal(fakeRepo.RepoProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(fakeRepo.RepoProducts[i].Name, products[i].Name);
+                Assert.Equal(fakeRepo.RepoProducts[i].Description, products[i].Description);
+                Assert.Equal(fakeRepo.RepoProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(fakeRepo.RepoProducts[i].Brand, products[i].Brand);
+                Assert.Equal(fakeRepo.RepoProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(fakeRepo.RepoProducts[i].Category, products[i].Category);
+                Assert.Equal(fakeRepo.RepoProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(fakeRepo.RepoProducts[i].Price, products[i].Price);
+            }
+            Assert.Equal(2, fakeRepo.Categories.Count);
+            Assert.True(fakeRepo.Categories.Contains("Category 1"));
+            Assert.True(fakeRepo.Categories.Contains("Category 2"));
+            Assert.Equal(2, fakeRepo.Brands.Count);
+            Assert.True(fakeRepo.Brands.Contains("Brand 1"));
+            Assert.True(fakeRepo.Brands.Contains("Brand 2"));
+        }
 
         [Fact]
-        public async Task MockPlaceholder()
+        public async Task CreateProducts_WithFakes_ValidProducts_RepoFails_ShouldNotFound()
         {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.RepoSucceeds = false;
+            fakeRepo.Brands = new List<string>();
+            fakeRepo.Categories = new List<string>();
+            fakeRepo.RepoProducts = new List<ProductRepoModel>();
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as NotFoundResult;
+            Assert.NotNull(obj);
+            Assert.True(fakeRepo.RepoProducts.Count == 0);
+            Assert.True(fakeRepo.Brands.Count == 0);
+            Assert.True(fakeRepo.Categories.Count == 0);
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithFakes_NullProducts_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.Brands = new List<string>();
+            fakeRepo.Categories = new List<string>();
+            fakeRepo.RepoProducts = new List<ProductRepoModel>();
+            products = null;
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
+            Assert.True(fakeRepo.RepoProducts.Count == 0);
+            Assert.True(fakeRepo.Brands.Count == 0);
+            Assert.True(fakeRepo.Categories.Count == 0);
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithFakes_EmptyProducts_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.Brands = new List<string>();
+            fakeRepo.Categories = new List<string>();
+            fakeRepo.RepoProducts = new List<ProductRepoModel>();
+            products = new List<ProductDto>();
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
+            Assert.True(fakeRepo.RepoProducts.Count == 0);
+            Assert.True(fakeRepo.Brands.Count == 0);
+            Assert.True(fakeRepo.Categories.Count == 0);
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithFakes_OneProductIsNull_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithFakes();
+            fakeRepo.Brands = new List<string>();
+            fakeRepo.Categories = new List<string>();
+            fakeRepo.RepoProducts = new List<ProductRepoModel>();
+            products[1] = null;
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
+            Assert.True(fakeRepo.RepoProducts.Count == 0);
+            Assert.True(fakeRepo.Brands.Count == 0);
+            Assert.True(fakeRepo.Categories.Count == 0);
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithMocks_ValidProducts_ShouldOk()
+        {
+            //Arrange
+            SetupWithMocks();
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as OkResult;
+            Assert.NotNull(obj);
+            mockRepo.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductRepoModel>>()), Times.Once);
+            mockRepo.Verify(repo => repo.UpdateBrands(It.IsAny<IList<ProductRepoModel>>()), Times.Once);
+            mockRepo.Verify(repo => repo.UpdateCategories(It.IsAny<IList<ProductRepoModel>>()), Times.Once);
+            mockRepo.Verify(repo => repo.GetProduct(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProducts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProductInfo(), Times.Never);
+            mockOrderFacade.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductUpdateDto>>()), Times.Once);
+
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithMocks_NullProducts_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithMocks();
+            products = null;
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
             mockRepo.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
             mockRepo.Verify(repo => repo.UpdateBrands(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
             mockRepo.Verify(repo => repo.UpdateCategories(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
@@ -3346,7 +3562,57 @@ namespace ProductUnitTests
                 It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double>()), Times.Never);
             mockRepo.Verify(repo => repo.GetProductInfo(), Times.Never);
             mockOrderFacade.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductUpdateDto>>()), Times.Never);
+
         }
 
+        [Fact]
+        public async Task CreateProducts_WithMocks_EmptyProducts_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithMocks();
+            products = new List<ProductDto>();
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
+            mockRepo.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.UpdateBrands(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.UpdateCategories(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProduct(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProducts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProductInfo(), Times.Never);
+            mockOrderFacade.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductUpdateDto>>()), Times.Never);
+
+        }
+
+        [Fact]
+        public async Task CreateProducts_WithMocks_OneProductIsNull_ShouldUnprocessableEntity()
+        {
+            //Arrange
+            SetupWithMocks();
+            products[1] = null;
+
+            //Act
+            var result = controller.Create(products);
+
+            //Assert 
+            Assert.NotNull(result);
+            var obj = await result as UnprocessableEntityResult;
+            Assert.NotNull(obj);
+            mockRepo.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.UpdateBrands(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.UpdateCategories(It.IsAny<IList<ProductRepoModel>>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProduct(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProducts(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<double>(), It.IsAny<double>()), Times.Never);
+            mockRepo.Verify(repo => repo.GetProductInfo(), Times.Never);
+            mockOrderFacade.Verify(repo => repo.UpdateProducts(It.IsAny<IList<ProductUpdateDto>>()), Times.Never);
+
+        }
     }
 }

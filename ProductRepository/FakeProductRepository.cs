@@ -39,12 +39,20 @@ namespace ProductRepository
                     Categories = Categories
                 };
             }
-            return null;
+            return new ProductInfoRepoModel
+            {
+                Brands = new List<string>(),
+                Categories = new List<string>()
+            }; ;
         }
 
         public async Task<IList<ProductRepoModel>> GetProducts(int? brandId, int? categoryId, 
             string brand, string category, string searchString, double? minPrice, double? maxPrice)
         {
+            if(!RepoSucceeds)
+            {
+                return new List<ProductRepoModel>();
+            }
             IList<ProductRepoModel> result = RepoProducts;
             IEnumerable<ProductRepoModel> toRemove;
             if (brandId != null && brandId > 0)
@@ -127,19 +135,47 @@ namespace ProductRepository
             return result;
         }
 
-        public Task<bool> UpdateBrands(IList<ProductRepoModel> products)
+        public async Task<bool> UpdateBrands(IList<ProductRepoModel> products)
         {
-            throw new NotImplementedException();
+            if (RepoSucceeds)
+            {
+                List<string> brands = new List<string>();
+                foreach (ProductRepoModel product in products)
+                {
+                    if (!brands.Contains(product.Brand))
+                    {
+                        brands.Add(product.Brand);
+                    }
+                }
+                Brands = brands;
+            }
+            return RepoSucceeds;
         }
 
-        public Task<bool> UpdateCategories(IList<ProductRepoModel> products)
+        public async Task<bool> UpdateCategories(IList<ProductRepoModel> products)
         {
-            throw new NotImplementedException();
+            if (RepoSucceeds)
+            {
+                List<string> categories = new List<string>();
+                foreach (ProductRepoModel product in products)
+                {
+                    if (!categories.Contains(product.Category))
+                    {
+                        categories.Add(product.Category);
+                    }
+                }
+                Categories = categories;
+            }
+            return RepoSucceeds;
         }
 
-        public Task<bool> UpdateProducts(IList<ProductRepoModel> products)
+        public async Task<bool> UpdateProducts(IList<ProductRepoModel> products)
         {
-            throw new NotImplementedException();
+            if (RepoSucceeds)
+            {
+                RepoProducts = products;
+            }
+            return RepoSucceeds;
         }
     }
 }
