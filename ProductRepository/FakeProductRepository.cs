@@ -2,6 +2,7 @@
 using ProductRepository.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,29 +10,121 @@ namespace ProductRepository
 {
     public class FakeProductRepository : IProductRepository
     {
+        public bool RepoSucceeds = true;
+
         public ProductRepoModel ProductRepoModel {get; set;}
+
+        public IList<ProductRepoModel> RepoProducts { get; set; }
 
         public List<String> Brands { get; set; }
 
         public List<String> Categories { get; set; }
 
-        public Task<ProductRepoModel> GetProduct(int productId)
+        public async Task<ProductRepoModel> GetProduct(int productId)
         {
-            throw new NotImplementedException();
+            if (RepoSucceeds && productId == ProductRepoModel.ProductId)
+            {
+                return ProductRepoModel;
+            }
+            else return null;
         }
 
         public async Task<ProductInfoRepoModel> GetProductInfo()
         {
-            return new ProductInfoRepoModel
+            if (RepoSucceeds)
             {
-                Brands = Brands,
-                Categories = Categories
-            };
+                return new ProductInfoRepoModel
+                {
+                    Brands = Brands,
+                    Categories = Categories
+                };
+            }
+            return null;
         }
 
-        public Task<IList<ProductRepoModel>> GetProducts(int? brandId, int? categoryId, string brand, string category, string searchString, double? minPrice, double? maxPrice)
+        public async Task<IList<ProductRepoModel>> GetProducts(int? brandId, int? categoryId, 
+            string brand, string category, string searchString, double? minPrice, double? maxPrice)
         {
-            throw new NotImplementedException();
+            IList<ProductRepoModel> result = RepoProducts;
+            IEnumerable<ProductRepoModel> toRemove;
+            if (brandId != null && brandId > 0)
+            {
+                toRemove = result.Where(p => p.BrandId != brandId).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (categoryId != null && categoryId > 0)
+            {
+                toRemove = result.Where(p => p.CategoryId != categoryId).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (minPrice != null && minPrice > 0)
+            {
+                toRemove = result.Where(p => p.Price < minPrice).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (maxPrice != null && maxPrice > 0)
+            {
+                toRemove = result.Where(p => p.Price > maxPrice).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                toRemove = result.Where(p => !p.Name.Contains(searchString) && !p.Description.Contains(searchString)).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(brand))
+            {
+                toRemove = result.Where(p => p.Brand != brand).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(category))
+            {
+                toRemove = result.Where(p => p.Category != category).ToList();
+                if (toRemove.Count() > 0)
+                {
+                    foreach (ProductRepoModel product in toRemove)
+                    {
+                        RepoProducts.Remove(product);
+                    }
+                }
+            }
+            return result;
         }
 
         public Task<bool> UpdateBrands(IList<ProductRepoModel> products)

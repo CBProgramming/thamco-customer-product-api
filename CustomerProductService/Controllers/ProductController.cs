@@ -45,13 +45,18 @@ namespace CustomerProductService.Controllers
                 && string.IsNullOrEmpty(category)
                 && string.IsNullOrEmpty(searchString)
                 && (minPrice == null || minPrice < 0.01)
-                && (maxPrice == null || maxPrice < 0.01))  //tested with fakes and mocks
+                && (maxPrice == null || maxPrice < 0.01))
             {
                 return Ok(_mapper.Map<ProductInfoDto>(await _productRepo.GetProductInfo()));
             }
             else if (productId != null && productId > 0)
             {
-                return Ok(_mapper.Map<ProductDto>(await _productRepo.GetProduct(productId??0)));
+                var product = _mapper.Map<ProductDto>(await _productRepo.GetProduct(productId ?? 0));
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
             }
             else
             {
