@@ -76,7 +76,8 @@ namespace CustomerProductService
                     .AddAuthenticationSchemes("CustomerAuth")
                     .Build());
                 OptionsBuilderConfigurationExtensions.AddPolicy("StaffProductAPIOnly", new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
+                    .RequireAssertion(context =>
+                        context.User.HasClaim(c => c.Type == "client_id" && c.Value == "staff_product_api"))
                     .AddAuthenticationSchemes("ProductAuth")
                     .Build());
             });
