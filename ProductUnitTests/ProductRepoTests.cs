@@ -182,14 +182,11 @@ namespace ProductUnitTests
 
         private void SetupMockCategories()
         {
-            if (dbCategories != null)
-            {
-                mockCategories = new Mock<DbSet<Category>>();
-                mockCategories.As<IQueryable<Category>>().Setup(m => m.Provider).Returns(dbCategories.Provider);
-                mockCategories.As<IQueryable<Category>>().Setup(m => m.Expression).Returns(dbCategories.Expression);
-                mockCategories.As<IQueryable<Category>>().Setup(m => m.ElementType).Returns(dbCategories.ElementType);
-                mockCategories.As<IQueryable<Category>>().Setup(m => m.GetEnumerator()).Returns(dbCategories.GetEnumerator());
-            }
+            mockCategories = new Mock<DbSet<Category>>();
+            mockCategories.As<IQueryable<Category>>().Setup(m => m.Provider).Returns(dbCategories.Provider);
+            mockCategories.As<IQueryable<Category>>().Setup(m => m.Expression).Returns(dbCategories.Expression);
+            mockCategories.As<IQueryable<Category>>().Setup(m => m.ElementType).Returns(dbCategories.ElementType);
+            mockCategories.As<IQueryable<Category>>().Setup(m => m.GetEnumerator()).Returns(dbCategories.GetEnumerator());
         }
 
         private void SetupDbBrands()
@@ -204,14 +201,11 @@ namespace ProductUnitTests
 
         private void SetupMockBrands()
         {
-            if (dbCategories != null)
-            {
-                mockBrands = new Mock<DbSet<Brand>>();
-                mockBrands.As<IQueryable<Brand>>().Setup(m => m.Provider).Returns(dbBrands.Provider);
-                mockBrands.As<IQueryable<Brand>>().Setup(m => m.Expression).Returns(dbBrands.Expression);
-                mockBrands.As<IQueryable<Brand>>().Setup(m => m.ElementType).Returns(dbBrands.ElementType);
-                mockBrands.As<IQueryable<Brand>>().Setup(m => m.GetEnumerator()).Returns(dbBrands.GetEnumerator());
-            }
+            mockBrands = new Mock<DbSet<Brand>>();
+            mockBrands.As<IQueryable<Brand>>().Setup(m => m.Provider).Returns(dbBrands.Provider);
+            mockBrands.As<IQueryable<Brand>>().Setup(m => m.Expression).Returns(dbBrands.Expression);
+            mockBrands.As<IQueryable<Brand>>().Setup(m => m.ElementType).Returns(dbBrands.ElementType);
+            mockBrands.As<IQueryable<Brand>>().Setup(m => m.GetEnumerator()).Returns(dbBrands.GetEnumerator());
         }
 
         private void SetupMockDbContext()
@@ -1046,6 +1040,948 @@ namespace ProductUnitTests
             }
         }
 
+        [Fact]
+        public async Task GetProductInfo_EmptyCategories_ShouldReturnProductInfo()
+        {
+            //Arrange
+            SetupMapper();
+            SetupProductRepoModels();
+            SetupDbProducts();
+            SetupMockProducts();
+            SetupDbBrands();
+            SetupMockBrands();
+            dbCategories = new List<Category>().AsQueryable();
+            SetupMockCategories();
+            SetupMockDbContext();
+            repo = new ProductRepository.ProductRepository(mockDbContext.Object, mapper);
+            
 
+            //Act
+            var productInfo = await repo.GetProductInfo();
+
+            //Assert
+            Assert.NotNull(productInfo);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            mockDbContext.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
+            for (int i = 0; i < productInfo.Brands.Count; i++)
+            {
+                Assert.Equal(dbBrands.Select(b => b.BrandName).ToList()[i], productInfo.Brands[i]);
+            }
+            Assert.True(productInfo.Categories.Count == 0);
+        }
+
+        [Fact]
+        public async Task GetProductInfo_EmptyProducts_ShouldReturnProductInfo()
+        {
+            //Arrange
+            SetupMapper();
+            SetupProductRepoModels();
+            SetupDbProducts();
+            SetupMockProducts();
+            dbBrands = new List<Brand>().AsQueryable();
+            SetupMockBrands();
+            SetupDbCategories();
+            SetupMockCategories();
+            SetupMockDbContext();
+            repo = new ProductRepository.ProductRepository(mockDbContext.Object, mapper);
+
+
+            //Act
+            var productInfo = await repo.GetProductInfo();
+
+            //Assert
+            Assert.NotNull(productInfo);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            mockDbContext.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
+            for (int i = 0; i < productInfo.Categories.Count; i++)
+            {
+                Assert.Equal(dbCategories.Select(b => b.CategoryName).ToList()[i], productInfo.Categories[i]);
+            }
+            Assert.True(productInfo.Brands.Count == 0);
+        }
+
+        [Fact]
+        public async Task GetProductInfo_EmptyProductsAndCategories_ShouldReturnProductInfo()
+        {
+            //Arrange
+            SetupMapper();
+            SetupProductRepoModels();
+            SetupDbProducts();
+            SetupMockProducts();
+            dbBrands = new List<Brand>().AsQueryable();
+            SetupMockBrands();
+            dbCategories = new List<Category>().AsQueryable();
+            SetupMockCategories();
+            SetupMockDbContext();
+            repo = new ProductRepository.ProductRepository(mockDbContext.Object, mapper);
+
+
+            //Act
+            var productInfo = await repo.GetProductInfo();
+
+            //Assert
+            Assert.NotNull(productInfo);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            mockDbContext.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never());
+            Assert.True(productInfo.Categories.Count == 0);
+            Assert.True(productInfo.Brands.Count == 0);
+        }
+
+        [Fact]
+        public async Task GetProducts_AllNull_ReturnsAllProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidBrandId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int brandId = 1;
+            var expectedProducts = dbProducts.Where(p => p.BrandId == brandId).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(brandId, null, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidCategoryId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int categoryId = 1;
+            var expectedProducts = dbProducts.Where(p => p.CategoryId == categoryId).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, categoryId, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidBrand_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string brand = "Brand 1";
+            var expectedProducts = dbProducts.Where(p => p.BrandId == 1).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, brand, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidCategory_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string category = "Category 1";
+            var expectedProducts = dbProducts.Where(p => p.CategoryId == 1).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, category, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidSearchName_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "uct 1";
+            var expectedProducts = dbProducts.Where(p => p.Name.Contains(searchString) || p.Description.Contains(searchString)).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidSearchDescription_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "ion 1";
+            var expectedProducts = dbProducts.Where(p => p.Name.Contains(searchString) || p.Description.Contains(searchString)).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidMinPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            double minPrice = 2;
+            var expectedProducts = dbProducts.Where(p => p.Price >= minPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, minPrice, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidMaxPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            double maxPrice = 3;
+            var expectedProducts = dbProducts.Where(p => p.Price <= maxPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, null, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        //Due to time restrainsts cannot test all possible combinations of nullable vars
+        //A reasononable selection tested instead
+        [Fact]
+        public async Task GetProducts_ValidBrandIdAndCategoryId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int brandId = 1;
+            int categoryId = 2;
+            var expectedProducts = dbProducts.Where(p => p.BrandId <= brandId && p.CategoryId == categoryId).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(brandId, categoryId, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidBrandAndCategory_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string brand = "Brand 1";
+            string category = "Category 1";
+            var expectedProducts = dbProducts.Where(p => p.CategoryId == 1 && p.BrandId == 1).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, brand, category, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidSearchStringAndMinPriceAndMaxPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "oduct";
+            double minPrice = 1;
+            double maxPrice = 3;
+            var expectedProducts = dbProducts.Where(p => p.Price <= maxPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, minPrice, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidBrandId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int brandId = 0;
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(brandId, null, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidCategoryId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int categoryId = 0;
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, categoryId, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidBrand_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string brand = "";
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, brand, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidCategory_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string category = "";
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, category, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidSearch_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "";
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidMinPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            double minPrice = 0;
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, minPrice, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidMaxPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            double maxPrice = 0;
+            var expectedProducts = dbProducts.ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, null, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        //Due to time restrainsts cannot test all possible combinations of nullable vars
+        //A reasononable selection tested instead
+        [Fact]
+        public async Task GetProducts_InalidBrandIdAndValidCategoryId_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            int brandId = 0;
+            int categoryId = 2;
+            var expectedProducts = dbProducts.Where(p => p.CategoryId == categoryId).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(brandId, categoryId, null, null, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidBrandAndValidCategory_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string brand = "";
+            string category = "Category 1";
+            var expectedProducts = dbProducts.Where(p => p.CategoryId == 1).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, brand, category, null, null, null);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_InvalidSearchStringAndValidMinPriceAndValidMaxPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "";
+            double minPrice = 2;
+            double maxPrice = 3;
+            var expectedProducts = dbProducts.Where(p => p.Price <= maxPrice && p.Price >=minPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, minPrice, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_ValidalidSearchStringAndValidMinPriceAndInvalidMaxPrice_ReturnsProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            string searchString = "uct";
+            double minPrice = 1;
+            double maxPrice = 0;
+            var expectedProducts = dbProducts.Where(p => p.Name.Contains(searchString) ||p.Price <= maxPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, searchString, minPrice, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(expectedProducts.Count == products.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.Equal(expectedProducts[i].ProductId, products[i].ProductId);
+                Assert.Equal(expectedProducts[i].Name, products[i].Name);
+                Assert.Equal(expectedProducts[i].Description, products[i].Description);
+                Assert.Equal(expectedProducts[i].Quantity, products[i].Quantity);
+                Assert.Equal(expectedProducts[i].BrandId, products[i].BrandId);
+                Assert.Equal(dbBrands.Where(b => b.BrandId == expectedProducts[i].BrandId).Select(b => b.BrandName).FirstOrDefault(), products[i].Brand);
+                Assert.Equal(expectedProducts[i].CategoryId, products[i].CategoryId);
+                Assert.Equal(dbCategories.Where(c => c.CategoryId == expectedProducts[i].CategoryId).Select(b => b.CategoryName).FirstOrDefault(), products[i].Category);
+                Assert.Equal(expectedProducts[i].Price, products[i].Price);
+            }
+        }
+
+        [Fact]
+        public async Task GetProducts_TooRestrictiveValues_ReturnsEmptyProducts()
+        {
+            //Arrange
+            DefaultSetup();
+            double minPrice = 2.5;
+            double maxPrice = 2.51;
+            var expectedProducts = dbProducts.Where(p => p.Price <= maxPrice && p.Price >= minPrice).ToList();
+
+
+            //Act
+            var products = await repo.GetProducts(null, null, null, null, null, minPrice, maxPrice);
+
+            //Assert
+            Assert.NotNull(products);
+            mockDbContext.Verify(m => m.Add(It.IsAny<Product>()), Times.Never());
+            mockProducts.Verify(m => m.Remove(It.IsAny<Product>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Category>()), Times.Never());
+            mockCategories.Verify(m => m.Remove(It.IsAny<Category>()), Times.Never());
+            mockDbContext.Verify(m => m.Add(It.IsAny<Brand>()), Times.Never());
+            mockBrands.Verify(m => m.Remove(It.IsAny<Brand>()), Times.Never());
+            Assert.True(0 == products.Count);
+        }
     }
 }
