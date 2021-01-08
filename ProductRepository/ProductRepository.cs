@@ -44,7 +44,7 @@ namespace ProductRepository
                             product.Name = productModel.Name;
                             product.Description = productModel.Description;
                             product.Price = productModel.Price;
-                            product.Quantity += productModel.Quantity;
+                            product.Quantity = productModel.Quantity;
                             product.BrandId = productModel.BrandId;
                             product.CategoryId = productModel.CategoryId;
                         }

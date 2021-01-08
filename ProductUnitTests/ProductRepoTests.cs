@@ -244,7 +244,6 @@ namespace ProductUnitTests
         {
             //Arrange
             DefaultSetup();
-            var oldProduct1Stock = dbProduct1.Quantity;
 
             //Act
             var result = await repo.UpdateProducts(productRepoModels);
@@ -264,7 +263,7 @@ namespace ProductUnitTests
             Product product1 = dbProducts.FirstOrDefault(p => p.ProductId == productRepoModel1.ProductId);
             Assert.Equal(product1.Name, productRepoModel1.Name);
             Assert.Equal(product1.Description, productRepoModel1.Description);
-            Assert.Equal(product1.Quantity, productRepoModel1.Quantity + oldProduct1Stock);
+            Assert.Equal(product1.Quantity, productRepoModel1.Quantity);
             Assert.Equal(product1.BrandId, productRepoModel1.BrandId);
             Assert.Equal(product1.CategoryId, productRepoModel1.CategoryId);
             Assert.Equal(product1.Price, productRepoModel1.Price);
@@ -297,8 +296,6 @@ namespace ProductUnitTests
             //Arrange
             DefaultSetup();
             productRepoModels[1].ProductId = 2;
-            var oldProduct1Stock = dbProduct1.Quantity;
-            var oldProduct2Stock = dbProduct2.Quantity;
 
             //Act
             var result = await repo.UpdateProducts(productRepoModels);
@@ -316,7 +313,7 @@ namespace ProductUnitTests
             Product product1 = dbProducts.FirstOrDefault(p => p.ProductId == productRepoModel1.ProductId);
             Assert.Equal(product1.Name, productRepoModel1.Name);
             Assert.Equal(product1.Description, productRepoModel1.Description);
-            Assert.Equal(product1.Quantity, productRepoModel1.Quantity + oldProduct1Stock);
+            Assert.Equal(product1.Quantity, productRepoModel1.Quantity);
             Assert.Equal(product1.BrandId, productRepoModel1.BrandId);
             Assert.Equal(product1.CategoryId, productRepoModel1.CategoryId);
             Assert.Equal(product1.Price, productRepoModel1.Price);
@@ -324,7 +321,7 @@ namespace ProductUnitTests
             Product product2 = dbProducts.FirstOrDefault(p => p.ProductId == productRepoModel2.ProductId);
             Assert.Equal(product2.Name, productRepoModel2.Name);
             Assert.Equal(product2.Description, productRepoModel2.Description);
-            Assert.Equal(product2.Quantity, productRepoModel2.Quantity + oldProduct2Stock);
+            Assert.Equal(product2.Quantity, productRepoModel2.Quantity);
             Assert.Equal(product2.BrandId, productRepoModel2.BrandId);
             Assert.Equal(product2.CategoryId, productRepoModel2.CategoryId);
             Assert.Equal(product2.Price, productRepoModel2.Price);
@@ -381,7 +378,6 @@ namespace ProductUnitTests
             DefaultSetup();
             productRepoModels[0].ProductId = 1;
             productRepoModels[1] = null;
-            var oldProduct1Stock = dbProduct1.Quantity;
 
             //Act
             var result = await repo.UpdateProducts(productRepoModels);
@@ -398,7 +394,7 @@ namespace ProductUnitTests
             Product product1 = dbProducts.FirstOrDefault(p => p.ProductId == productRepoModel1.ProductId);
             Assert.Equal(product1.Name, productRepoModel1.Name);
             Assert.Equal(product1.Description, productRepoModel1.Description);
-            Assert.Equal(product1.Quantity, productRepoModel1.Quantity + oldProduct1Stock);
+            Assert.Equal(product1.Quantity, productRepoModel1.Quantity);
             Assert.Equal(product1.BrandId, productRepoModel1.BrandId);
             Assert.Equal(product1.CategoryId, productRepoModel1.CategoryId);
             Assert.Equal(product1.Price, productRepoModel1.Price);
@@ -411,7 +407,6 @@ namespace ProductUnitTests
             DefaultSetup();
             productRepoModels[0] = null;
             productRepoModels[1].ProductId = 2;
-            var oldProduct2Stock = dbProduct2.Quantity;
 
             //Act
             var result = await repo.UpdateProducts(productRepoModels);
@@ -428,7 +423,7 @@ namespace ProductUnitTests
             Product product2 = dbProducts.FirstOrDefault(p => p.ProductId == productRepoModel2.ProductId);
             Assert.Equal(product2.Name, productRepoModel2.Name);
             Assert.Equal(product2.Description, productRepoModel2.Description);
-            Assert.Equal(product2.Quantity, productRepoModel2.Quantity + oldProduct2Stock);
+            Assert.Equal(product2.Quantity, productRepoModel2.Quantity);
             Assert.Equal(product2.BrandId, productRepoModel2.BrandId);
             Assert.Equal(product2.CategoryId, productRepoModel2.CategoryId);
             Assert.Equal(product2.Price, productRepoModel2.Price);
