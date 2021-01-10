@@ -67,18 +67,20 @@ namespace ProductRepository
             }
             try
             {
+                List<int> tracker = new List<int>();
                 foreach (ProductRepoModel productModel in products)
                 {
                     if (productModel != null)
                     {
                         var dbBrand = _context.Brands.SingleOrDefault(b => b.BrandId == productModel.BrandId);
-                        if (dbBrand == null)
+                        if (dbBrand == null && !tracker.Contains(productModel.BrandId))
                         {
                             _context.Add(new Brand
                             {
                                 BrandId = productModel.BrandId,
                                 BrandName = productModel.Brand
                             });
+                            tracker.Add(productModel.BrandId);
                         }
                         else if (!string.IsNullOrEmpty(productModel.Brand) && dbBrand.BrandName != productModel.Brand)
                         {
@@ -103,18 +105,20 @@ namespace ProductRepository
             }
             try
             {
+                List<int> tracker = new List<int>();
                 foreach (ProductRepoModel productModel in products)
                 {
                     if (productModel != null)
                     {
                         var dbCategory = _context.Categories.SingleOrDefault(b => b.CategoryId == productModel.CategoryId);
-                        if (dbCategory == null)
+                        if (dbCategory == null && !tracker.Contains(productModel.CategoryId))
                         {
                             _context.Add(new Category
                             {
                                 CategoryId = productModel.CategoryId,
                                 CategoryName = productModel.Category
                             });
+                            tracker.Add(productModel.CategoryId);
                         }
                         else if (!string.IsNullOrEmpty(productModel.Category) && dbCategory.CategoryName != productModel.Category)
                         {
