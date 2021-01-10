@@ -82,7 +82,9 @@ namespace ProductRepository
                             });
                             tracker.Add(productModel.BrandId);
                         }
-                        else if (!string.IsNullOrEmpty(productModel.Brand) && dbBrand.BrandName != productModel.Brand)
+                        else if (dbBrand != null 
+                            && !string.IsNullOrEmpty(productModel.Brand) 
+                            && dbBrand.BrandName != productModel.Brand)
                         {
                             dbBrand.BrandName = productModel.Brand;
                         }
@@ -120,7 +122,9 @@ namespace ProductRepository
                             });
                             tracker.Add(productModel.CategoryId);
                         }
-                        else if (!string.IsNullOrEmpty(productModel.Category) && dbCategory.CategoryName != productModel.Category)
+                        else if (dbCategory != null
+                            && !string.IsNullOrEmpty(productModel.Category) 
+                            && dbCategory.CategoryName != productModel.Category)
                         {
                             dbCategory.CategoryName = productModel.Category;
                         }
