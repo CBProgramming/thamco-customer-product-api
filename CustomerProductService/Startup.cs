@@ -105,7 +105,7 @@ namespace CustomerProductService
 
             if (Env.IsDevelopment())
             {
-                services.AddScoped<IProductOrderFacade, ProductOrderFacade.ProductOrderFacade>();
+                services.AddScoped<IProductOrderFacade, ProductOrderFacade.FakeProductOrderFacade>();
             }
             else
             {
